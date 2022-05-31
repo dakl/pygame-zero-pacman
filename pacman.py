@@ -121,9 +121,6 @@ def eat_food():
     if world[iy][ix] == ".":
         world[iy][ix] = None
         pacman.food_left -= 1
-        if pacman.food_left == 0:
-            print("YOU WIN!")
-            exit()
 
 
 def reset_sprites():
@@ -139,6 +136,10 @@ def update():
     did_move = move_ahead(pacman, is_pacman=True)
     if did_move:
         eat_food()
+
+    if pacman.food_left == 0:
+        print("YOU WIN!")
+        exit()
 
     for g in ghosts:
         if g.colliderect(pacman):
