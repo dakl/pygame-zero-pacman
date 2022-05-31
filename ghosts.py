@@ -1,11 +1,12 @@
 import random
+from typing import List
 
 from pgzero.actor import Actor
 
 from settings import BLOCK_SIZE, GHOST_SPEED, char_to_image
 
 
-def make_ghost_actors(world):
+def make_ghost_actors(world) -> List[Actor]:
     ghosts = []
     for y, row in enumerate(world):
         for x, block in enumerate(row):

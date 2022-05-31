@@ -6,6 +6,7 @@ from ghosts import make_ghost_actors
 from levels import load_level
 from settings import BLOCK_SIZE, HEIGHT, SPEED, WIDTH, WORLD_SIZE, char_to_image
 
+TEST_MODE = True
 
 # Our sprites
 pacman = Actor("pacman_o.png")
@@ -16,7 +17,6 @@ world = load_level(1, pacman=pacman)
 
 ghosts = make_ghost_actors(world)
 ghost_start_pos = [(g.x, g.y) for g in ghosts]
-print(ghost_start_pos)
 
 # paw prints: 🐾
 
@@ -54,6 +54,10 @@ def on_key_up(key):
         pacman.dx = 0
     if key in (keys.UP, keys.DOWN):
         pacman.dy = 0
+    if TEST_MODE:
+        # Put special key commands here
+        if key == keys.N:
+            next_level()
 
 
 def blocks_ahead_of(actor, dx, dy):
@@ -121,9 +125,10 @@ def eat_food():
     if world[iy][ix] == ".":
         world[iy][ix] = None
         pacman.food_left -= 1
+        print(f"Ate food. Food left: {pacman.food_left}")
 
 
-def reset_sprites():
+def reset_sprites(pacman, ghosts, ghost_start_pos):
     pacman.x = pacman.y = 1.5 * BLOCK_SIZE
     pacman.angle = 0
     # Move ghosts back to their start pos
@@ -138,13 +143,12 @@ def update():
         eat_food()
 
     if pacman.food_left == 0:
-        print("YOU WIN!")
-        exit()
+        next_level()
 
     for g in ghosts:
         if g.colliderect(pacman):
             print("YOU LOSE!")
-            reset_sprites()
+            reset_sprites(pacman, ghosts, ghost_start_pos)
 
         did_move = move_ahead(g)
         if not did_move:
@@ -153,6 +157,17 @@ def update():
             if random() < 0.5:
                 g.dy = -g.dy
             move_ahead(g)
+
+
+def next_level():
+    global world, ghosts, ghost_start_pos
+
+    pacman.level += 1
+    world = load_level(pacman.level, pacman=pacman)
+    ghosts = make_ghost_actors(world)
+    ghost_start_pos = [(g.x, g.y) for g in ghosts]
+
+    reset_sprites(pacman, ghosts, ghost_start_pos)
 
 
 pgzrun.go()
