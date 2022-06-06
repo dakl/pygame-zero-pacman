@@ -1,11 +1,19 @@
 from random import random
-import pgzrun
-from pgzero.actor import Actor
-from ghosts import make_ghost_actors
+from typing import Tuple
+from urllib import request
 
+import numpy as np
+import pygame
+from pgzero.actor import Actor
+from pgzero.screen import Screen
+
+from ghosts import make_ghost_actors
 from levels import load_level
 from settings import BLOCK_SIZE, HEIGHT, SPEED, WIDTH, WORLD_SIZE, char_to_image
 
+screen = Screen(surface=pygame.Surface((WIDTH, HEIGHT)))
+# screen =
+pygame.display.set_mode((800, 600))  # change to the real resolution
 TEST_MODE = True
 
 # Our sprites
@@ -19,6 +27,18 @@ ghosts = make_ghost_actors(world)
 ghost_start_pos = [(g.x, g.y) for g in ghosts]
 
 # paw prints: 🐾
+
+
+def step(action: int):
+    """action 0 = left, 1 = right, 2 = up, 3 = down, 4 = stay"""
+    if action == 0:
+        pacman.dx = -SPEED
+    if action == 1:
+        pacman.dx = SPEED
+    if action == 2:
+        pacman.dy = -SPEED
+    if action == 3:
+        pacman.dy = SPEED
 
 
 def draw():
@@ -38,15 +58,24 @@ def draw():
         g.draw()
 
 
+ACTIONS = {
+    "LEFT": 0,
+    "RIGHT": 1,
+    "UP": 2,
+    "DOWN": 3,
+    "STAY": 4,
+}
+
+
 def on_key_down(key):
     if key == keys.LEFT:
-        pacman.dx = -SPEED
+        step(ACTIONS["LEFT"])
     if key == keys.RIGHT:
-        pacman.dx = SPEED
+        step(ACTIONS["RIGHT"])
     if key == keys.UP:
-        pacman.dy = -SPEED
+        step(ACTIONS["UP"])
     if key == keys.DOWN:
-        pacman.dy = SPEED
+        step(ACTIONS["DOWN"])
 
 
 def on_key_up(key):
@@ -120,12 +149,15 @@ def move_ahead(actor, is_pacman: bool = False):
     return old_x != actor.x or old_y != actor.y
 
 
-def eat_food():
+def eat_food() -> bool:
     ix, iy = int(pacman.x / BLOCK_SIZE), int(pacman.y / BLOCK_SIZE)
+    did_eat_food = False
     if world[iy][ix] == ".":
         world[iy][ix] = None
         pacman.food_left -= 1
         print(f"Ate food. Food left: {pacman.food_left}")
+        did_eat_food = True
+    return did_eat_food
 
 
 def reset_sprites(pacman, ghosts, ghost_start_pos):
@@ -137,18 +169,29 @@ def reset_sprites(pacman, ghosts, ghost_start_pos):
         g.y = y
 
 
-def update():
+def update(training: bool = False) -> Tuple[int, bool]:
+    """Returns tuple (reward, done).
+    Reward is 1 if pacman ate food, 0 if it did not, -100 if pacman died."""
+
     did_move = move_ahead(pacman, is_pacman=True)
+    reward, done = 0, False
+
     if did_move:
-        eat_food()
+        did_eat_food = eat_food()
+        if did_eat_food:
+            reward = 1
 
     if pacman.food_left == 0:
         next_level()
 
     for g in ghosts:
         if g.colliderect(pacman):
-            print("YOU LOSE!")
-            reset_sprites(pacman, ghosts, ghost_start_pos)
+            reward, done = -100, True
+            if training:
+                return reward, done
+            else:
+                print("YOU LOSE!")
+                reset_sprites(pacman, ghosts, ghost_start_pos)
 
         did_move = move_ahead(g)
         if not did_move:
@@ -157,6 +200,8 @@ def update():
             if random() < 0.5:
                 g.dy = -g.dy
             move_ahead(g)
+
+    return reward, done
 
 
 def next_level():
@@ -170,4 +215,14 @@ def next_level():
     reset_sprites(pacman, ghosts, ghost_start_pos)
 
 
-pgzrun.go()
+def get_state():
+    np_world = np.array(world)
+    ghost_coords = [(g.x, g.y) for g in ghosts]
+    pacman_coords = (pacman.x, pacman.y)
+    return np_world, ghost_coords, pacman_coords
+
+
+if __name__ == "__main__":
+    import pgzrun
+
+    pgzrun.go()
