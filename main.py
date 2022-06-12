@@ -10,7 +10,7 @@ TEST_MODE = True
 
 pygame.display.set_mode((WIDTH, HEIGHT))
 screen = Screen(surface=pygame.Surface((WIDTH, HEIGHT)))
-game = PacmanGame(screen)
+game = PacmanGame()
 
 pacman = Actor("pacman_o.png", anchor=('left', 'top'))
 ghosts = [
