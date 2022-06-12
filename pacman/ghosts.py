@@ -1,23 +1,24 @@
 import random
 from typing import List
 
-from pgzero.actor import Actor
+from pacman.actor import CustomActor
+from pacman.settings import BLOCK_SIZE, GHOST_SPEED
 
-from settings import BLOCK_SIZE, GHOST_SPEED, char_to_image
 
-
-def make_ghost_actors(world) -> List[Actor]:
+def make_ghost_actors(world) -> List[CustomActor]:
     ghosts = []
     for y, row in enumerate(world):
         for x, block in enumerate(row):
             if block == "g" or block == "G":
-                g = Actor(
-                    char_to_image[block],
-                    (x * BLOCK_SIZE, y * BLOCK_SIZE),
-                    anchor=("left", "top"),
+                g = CustomActor(
+                    x=x * BLOCK_SIZE,
+                    y=y * BLOCK_SIZE,
+                    width=BLOCK_SIZE,
+                    height=BLOCK_SIZE,
                 )
                 g.dx = random.choice([-GHOST_SPEED, GHOST_SPEED])
                 g.dy = random.choice([-GHOST_SPEED, GHOST_SPEED])
+                g.block = block
                 ghosts.append(g)
                 # Now we have the ghost sprite we don't need this block
                 world[y][x] = None

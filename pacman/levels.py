@@ -1,7 +1,8 @@
-from settings import BLOCK_SIZE
+from pacman.actor import CustomActor
+from pacman.settings import BLOCK_SIZE
 
 
-def load_level(number, pacman):
+def load_level(number: int, pacman: CustomActor):
     world = []
     file = "level-%s.txt" % number
     pacman.food_left = 0
@@ -14,8 +15,8 @@ def load_level(number, pacman):
                 if block == ".":
                     pacman.food_left += 1
                 elif block == "P":
-                    pacman.x = 1.5 * (len(row) - 1) * BLOCK_SIZE
-                    pacman.y = 1.5 * len(world) * BLOCK_SIZE
+                    pacman.x = (len(row) - 1) * BLOCK_SIZE
+                    pacman.y = len(world) * BLOCK_SIZE
             world.append(row)
     print(f"pacman.food_left = {pacman.food_left}")
 
