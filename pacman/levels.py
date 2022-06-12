@@ -9,15 +9,17 @@ def load_level(number: int, pacman: CustomActor):
 
     with open(file) as f:
         for line in f:
-            row = []
-            for block in line:
-                row.append(block)
-                if block == ".":
-                    pacman.food_left += 1
-                elif block == "P":
-                    pacman.x = (len(row) - 1) * BLOCK_SIZE
-                    pacman.y = len(world) * BLOCK_SIZE
-            world.append(row)
-    print(f"pacman.food_left = {pacman.food_left}")
+            if line:
+                row = []
+                for block in line:
+                    if block == "\n":
+                        continue
+                    row.append(block)
+                    if block == ".":
+                        pacman.food_left += 1
+                    elif block == "P":
+                        pacman.x = (len(row) - 1) * BLOCK_SIZE
+                        pacman.y = len(world) * BLOCK_SIZE
+                world.append(row)
 
     return world

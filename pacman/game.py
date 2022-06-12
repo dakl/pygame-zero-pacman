@@ -21,7 +21,7 @@ ACTIONS = {
 
 
 class PacmanGame:
-    def __init__(self, screen) -> None:
+    def __init__(self) -> None:
         self.pacman = CustomActor(
             x=None,
             y=None,
@@ -94,7 +94,6 @@ class PacmanGame:
         self.wrap_around(actor)
         moved = (old_x != actor.x) or (old_y != actor.y)
         if moved and is_pacman:
-            print("moved")
             if old_x < actor.x and old_y == actor.y:
                 actor.angle = 0
             elif old_x > actor.x and old_y == actor.y:
@@ -112,7 +111,6 @@ class PacmanGame:
         if self.world[iy][ix] == ".":
             self.world[iy][ix] = None
             self.pacman.food_left -= 1
-            print(f"Ate food. Food left: {self.pacman.food_left}")
             did_eat_food = True
         return did_eat_food
 
@@ -148,7 +146,6 @@ class PacmanGame:
                 if training:
                     return reward, done
                 else:
-                    print("YOU LOSE!")
                     self.reset_sprites()
 
             did_move = self.move_ahead(g)
@@ -172,4 +169,4 @@ class PacmanGame:
         np_world = np.array(self.world)
         ghost_coords = [(g.x, g.y) for g in self.ghosts]
         pacman_coords = (self.pacman.x, self.pacman.y)
-        return np_world, ghost_coords, pacman_coords
+        return np_world.T, ghost_coords, pacman_coords
