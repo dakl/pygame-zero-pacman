@@ -43,19 +43,19 @@ def test_get_state():
     state = game.get_state()
 
     # Assert state shape is (WORLD_SIZE, WORLD_SIZE)
-    assert state.shape == (WORLD_SIZE, WORLD_SIZE)
+    assert state.shape == (WORLD_SIZE, WORLD_SIZE, 5)
 
     # Assert pacman exists in state
-    assert state[game.pacman.x//BLOCK_SIZE, game.pacman.y//BLOCK_SIZE] == "P"
+    assert state[game.pacman.x // BLOCK_SIZE, game.pacman.y // BLOCK_SIZE, 2] == 1
 
     # Assert ghosts exist in state
     for g in game.ghosts:
-        assert state[g.x//BLOCK_SIZE, g.y//BLOCK_SIZE] == "G"
+        assert state[g.x // BLOCK_SIZE, g.y // BLOCK_SIZE, 3] == 1
 
 
 def test_world_is_xy():
     game = PacmanGame()
-    np_world = game.get_state()
+    state = game.get_state()
 
-    assert np_world[0, 3] != "="
-    assert np_world[3, 0] == "="
+    assert state[0, 3, 0] == 0  # no wall (=) at x=0, y=3
+    assert state[3, 0, 0] == 1  # wall (=) at x=3, y=0

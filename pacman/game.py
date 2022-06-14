@@ -166,10 +166,26 @@ class PacmanGame:
         self.reset_sprites()
 
     def get_state(self):
+        """Get state as a (WORLD_SIZE, WORLD_SIZE, 5) numpy array.
+        channels are binary indicators showing if a space contains = . P G *
+        in that order.
+        Therefore state[x, y, :] is a 1-hot vector of the state at x, y."""
+        world = np.zeros((WORLD_SIZE, WORLD_SIZE, 5))
         np_world = np.array(self.world).T
-        ghost_coords = [(g.x // BLOCK_SIZE, g.y // BLOCK_SIZE) for g in self.ghosts]
-        pacman_coords = (self.pacman.x // BLOCK_SIZE, self.pacman.y // BLOCK_SIZE)
-        for x, y in ghost_coords:
-            np_world[x, y] = "G"
-        np_world[pacman_coords[0], pacman_coords[1]] = "P"
-        return np_world
+
+        # channel 0: walls
+        world[:, :, 0][np.where(np_world == "=")] = 1
+
+        # channel 1: food
+        world[:, :, 1][np.where(np_world == ".")] = 1
+
+        # channel 2: pacman
+        world[int(self.pacman.x / BLOCK_SIZE), int(self.pacman.y / BLOCK_SIZE), 2] = 1
+
+        # channel 3: ghosts
+        for g in self.ghosts:
+            world[int(g.x / BLOCK_SIZE), int(g.y / BLOCK_SIZE), 3] = 1
+
+        # channel 4: power-ups
+        world[:, :, 4][np.where(np_world == "*")] = 1
+        return world
