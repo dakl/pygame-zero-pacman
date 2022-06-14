@@ -1,5 +1,5 @@
 from pacman.game import ACTIONS, PacmanGame
-from pacman.settings import WIDTH
+from pacman.settings import BLOCK_SIZE, WORLD_SIZE
 
 
 def test_pacman_can_move_right_on_level_1():
@@ -42,17 +42,20 @@ def test_get_state():
     # Act
     state = game.get_state()
 
-    # Assert
-    assert len(state) == 3
+    # Assert state shape is (WORLD_SIZE, WORLD_SIZE)
+    assert state.shape == (WORLD_SIZE, WORLD_SIZE)
 
-    # np_world, ghost_coords, pacman_coords
-    assert len(state[1]) == len(game.ghosts)
-    assert state[2] == (game.pacman.x, game.pacman.y)
+    # Assert pacman exists in state
+    assert state[game.pacman.x//BLOCK_SIZE, game.pacman.y//BLOCK_SIZE] == "P"
+
+    # Assert ghosts exist in state
+    for g in game.ghosts:
+        assert state[g.x//BLOCK_SIZE, g.y//BLOCK_SIZE] == "G"
 
 
 def test_world_is_xy():
     game = PacmanGame()
-    np_world = game.get_state()[0]
+    np_world = game.get_state()
 
-    assert np_world[0, 3] == "."
+    assert np_world[0, 3] != "="
     assert np_world[3, 0] == "="

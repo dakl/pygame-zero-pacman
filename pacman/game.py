@@ -166,7 +166,10 @@ class PacmanGame:
         self.reset_sprites()
 
     def get_state(self):
-        np_world = np.array(self.world)
-        ghost_coords = [(g.x, g.y) for g in self.ghosts]
-        pacman_coords = (self.pacman.x, self.pacman.y)
-        return np_world.T, ghost_coords, pacman_coords
+        np_world = np.array(self.world).T
+        ghost_coords = [(g.x // BLOCK_SIZE, g.y // BLOCK_SIZE) for g in self.ghosts]
+        pacman_coords = (self.pacman.x // BLOCK_SIZE, self.pacman.y // BLOCK_SIZE)
+        for x, y in ghost_coords:
+            np_world[x, y] = "G"
+        np_world[pacman_coords[0], pacman_coords[1]] = "P"
+        return np_world
