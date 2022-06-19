@@ -1,0 +1,6 @@
+black
+ipdb
+ipython
+isort
+mypy
+pytest

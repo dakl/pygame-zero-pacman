@@ -1,0 +1,6 @@
+fire
+gym
+pgzero
+tensorflow-macos
+tensorflow-metal
+tf-agents[reverb]

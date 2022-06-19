@@ -1,12 +1,19 @@
 import pgzrun
 import pygame
-from pgzero.screen import Screen
 from pgzero.actor import Actor
+from pgzero.screen import Screen
 
+from pacman.agents.heuristic import MoveRightOnlyAgent, RandomAgent
 from pacman.game import ACTIONS, PacmanGame
-from pacman.settings import HEIGHT, WIDTH, char_to_image, BLOCK_SIZE
+from pacman.settings import (AGENT, BLOCK_SIZE, HEIGHT, TEST_MODE, WIDTH,
+                             char_to_image)
 
-TEST_MODE = True
+if AGENT == "random":
+    agent = RandomAgent()
+elif AGENT == "move_right_only":
+    agent = MoveRightOnlyAgent()
+else:
+    agent = None
 
 pygame.display.set_mode((WIDTH, HEIGHT))
 screen = Screen(surface=pygame.Surface((WIDTH, HEIGHT)))
@@ -44,29 +51,34 @@ def draw():
 
 
 def update():
+    if agent:
+        action = agent.act(game.get_state())
+        game.step(action)
     game.update()
 
+def register_keys():
+    def on_key_down(key):
+        if key == keys.LEFT:
+            game.step(ACTIONS["LEFT"])
+        if key == keys.RIGHT:
+            game.step(ACTIONS["RIGHT"])
+        if key == keys.UP:
+            game.step(ACTIONS["UP"])
+        if key == keys.DOWN:
+            game.step(ACTIONS["DOWN"])
 
-def on_key_down(key):
-    if key == keys.LEFT:
-        game.step(ACTIONS["LEFT"])
-    if key == keys.RIGHT:
-        game.step(ACTIONS["RIGHT"])
-    if key == keys.UP:
-        game.step(ACTIONS["UP"])
-    if key == keys.DOWN:
-        game.step(ACTIONS["DOWN"])
 
+    def on_key_up(key):
+        if key in (keys.LEFT, keys.RIGHT):
+            game.pacman.dx = 0
+        if key in (keys.UP, keys.DOWN):
+            game.pacman.dy = 0
+        if TEST_MODE:
+            # Put special key commands here
+            if key == keys.N:
+                game.next_level()
 
-def on_key_up(key):
-    if key in (keys.LEFT, keys.RIGHT):
-        game.pacman.dx = 0
-    if key in (keys.UP, keys.DOWN):
-        game.pacman.dy = 0
-    if TEST_MODE:
-        # Put special key commands here
-        if key == keys.N:
-            game.next_level()
-
+if not agent:
+    register_keys()
 
 pgzrun.go()
